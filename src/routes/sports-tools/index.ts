@@ -1,6 +1,10 @@
-import { Router } from 'express';
-import { authenticate, requireToolsAccess } from '../../middleware/auth';
-import { getPositiveEV, getSports } from '../../controllers/sportsToolsController';
+import { Router } from "express";
+import { authenticate, requireToolsAccess } from "../../middleware/auth";
+import {
+  getCheatSheet,
+  getPositiveEV,
+  getSports,
+} from "../../controllers/sportsToolsController";
 
 const router = Router();
 
@@ -9,8 +13,9 @@ router.use(authenticate);
 router.use(requireToolsAccess);
 
 // Routes
-router.get('/sports', getSports);
-router.get('/positive-ev', getPositiveEV);
+router.get("/sports", getSports);
+router.get("/cheat-sheet", getCheatSheet);
+router.get("/positive-ev", getPositiveEV);
 
 // TODO: Implement other routes
 // router.get('/cheat-sheet', getCheatSheet);
@@ -21,4 +26,3 @@ router.get('/positive-ev', getPositiveEV);
 // router.post('/parlay-generator', generateParlay);
 
 export default router;
-

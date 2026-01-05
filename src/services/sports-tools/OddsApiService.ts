@@ -14,6 +14,11 @@ export class OddsApiService {
     return (process.env.ODDS_API_KEY || "").trim();
   }
 
+  private isPlayerPropMarket(market: string): boolean {
+    // The Odds API uses player_* naming for player prop markets.
+    return market.toLowerCase().startsWith("player_");
+  }
+
   /**
    * Fetch odds for a specific sport
    */
@@ -39,6 +44,19 @@ export class OddsApiService {
         markets = ["h2h", "spreads", "totals"],
         oddsFormat = "american",
       } = params;
+
+      // IMPORTANT: The /sports/{sport}/odds endpoint does NOT support player prop markets.
+      // For player props, you must use the events flow:
+      // 1) GET /sports/{sport}/events
+      // 2) GET /sports/{sport}/events/{eventId}/odds?markets=player_*
+      if (markets.some((m) => this.isPlayerPropMarket(m))) {
+        const err: any = new Error(
+          `INVALID_MARKET: Player prop markets are not supported on /odds. Use /events/{eventId}/odds instead.`
+        );
+        err.code = "INVALID_MARKET";
+        err.status = 422;
+        throw err;
+      }
 
       const response = await axios.get(`${this.baseUrl}/sports/${sport}/odds`, {
         params: {
@@ -102,6 +120,93 @@ export class OddsApiService {
     } catch (error) {
       logger.error("Error getting sport by key:", error);
       return null;
+    }
+  }
+
+  /**
+   * Fetch upcoming events for a sport (needed for player props)
+   */
+  async getEvents(params: {
+    sport: string;
+    regions?: string[];
+    // Optional ISO date filters supported by the Odds API (/events) as "dateFormat" + "date" in some plans.
+    // We keep it simple here.
+  }) {
+    if (!this.getApikey()) {
+      return {
+        data: [],
+        remaining: 0,
+        warning: "ODDS_API_KEY not configured" as const,
+      };
+    }
+
+    try {
+      const { sport } = params;
+      const response = await axios.get(
+        `${this.baseUrl}/sports/${sport}/events`,
+        {
+          params: {
+            apiKey: this.getApikey(),
+          },
+        }
+      );
+
+      return {
+        data: response.data,
+        remaining: parseInt(response.headers["x-requests-remaining"] || "0"),
+      };
+    } catch (error) {
+      logger.error("Error fetching events:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch odds for a specific event (supports player prop markets)
+   */
+  async getEventOdds(params: {
+    sport: string;
+    eventId: string;
+    regions?: string[];
+    markets?: string[];
+    oddsFormat?: "american" | "decimal" | "hongkong";
+  }) {
+    if (!this.getApikey()) {
+      return {
+        data: null,
+        remaining: 0,
+        warning: "ODDS_API_KEY not configured" as const,
+      };
+    }
+
+    try {
+      const {
+        sport,
+        eventId,
+        regions = ["us"],
+        markets = ["h2h"],
+        oddsFormat = "american",
+      } = params;
+
+      const response = await axios.get(
+        `${this.baseUrl}/sports/${sport}/events/${eventId}/odds`,
+        {
+          params: {
+            apiKey: this.getApikey(),
+            regions: regions.join(","),
+            markets: markets.join(","),
+            oddsFormat,
+          },
+        }
+      );
+
+      return {
+        data: response.data,
+        remaining: parseInt(response.headers["x-requests-remaining"] || "0"),
+      };
+    } catch (error) {
+      logger.error("Error fetching event odds:", error);
+      throw error;
     }
   }
 }
