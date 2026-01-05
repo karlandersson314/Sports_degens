@@ -1,0 +1,37 @@
+### ============================================
+### Payment & Subscription Tests
+### ============================================
+### Prerequisites:
+### 1. User must be logged in (get token from auth/login)
+### 2. Replace YOUR_TOKEN_HERE with actual token
+### 3. Replace YOUR_PRICE_ID with Stripe price ID
+### ============================================
+
+### Create Checkout Session
+### Requires: Stripe Price ID (get from Stripe Dashboard)
+POST http://localhost:3000/api/payment/create-checkout-session
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "priceId": "price_YOUR_PRICE_ID_HERE"
+}
+
+### Get Subscription Status
+GET http://localhost:3000/api/payment/subscription-status
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Cancel Subscription
+POST http://localhost:3000/api/payment/cancel-subscription
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### ============================================
+### Webhook Testing (Use Stripe CLI)
+### ============================================
+### To test webhooks locally, use Stripe CLI:
+### 1. Install: https://stripe.com/docs/stripe-cli
+### 2. Login: stripe login
+### 3. Forward webhooks: stripe listen --forward-to localhost:3000/api/payment/webhook
+### 4. Trigger test events: stripe trigger checkout.session.completed
+### ============================================
+

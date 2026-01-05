@@ -1,0 +1,104 @@
+### ============================================
+### Sports Degens API Tests
+### ============================================
+### Instructions:
+### 1. Make sure server is running: npm run dev
+### 2. Click "Send Request" above each request
+### 3. After login, copy the token and replace YOUR_TOKEN_HERE below
+### ============================================
+
+### Health Check
+GET http://localhost:3000/health
+
+### ============================================
+### Authentication Tests
+### ============================================
+
+### Register a new user
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Login (Copy the token from response!)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### ============================================
+### Protected Routes (Require Authentication)
+### ============================================
+### Replace YOUR_TOKEN_HERE with token from login response
+
+### Get Sports List (requires auth + tools access)
+GET http://localhost:3000/api/sports-tools/sports
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Positive EV Bets (requires auth + tools access)
+### Parameters: 
+###   - sport (required): Sport key (e.g., 'americanfootball_nfl')
+###   - regions (optional): Comma-separated (e.g., 'us,eu')
+###   - minEV (optional): Minimum expected value (default: 0)
+###   - bookmaker (optional): Filter by bookmaker name
+###   - market (optional): Filter by market (h2h, spreads, totals)
+###   - page (optional): Page number (default: 1)
+###   - limit (optional): Results per page (default: 50, max: 100)
+
+### Basic - NFL
+GET http://localhost:3000/api/sports-tools/positive-ev?sport=americanfootball_nfl&regions=us
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### With filters - NBA, min EV of $5, first page
+GET http://localhost:3000/api/sports-tools/positive-ev?sport=basketball_nba&regions=us&minEV=5&page=1&limit=20
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Filter by bookmaker - MLB
+GET http://localhost:3000/api/sports-tools/positive-ev?sport=baseball_mlb&regions=us&bookmaker=DraftKings
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Filter by market - Only spreads
+GET http://localhost:3000/api/sports-tools/positive-ev?sport=americanfootball_nfl&regions=us&market=spreads
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Multiple regions
+GET http://localhost:3000/api/sports-tools/positive-ev?sport=basketball_nba&regions=us,eu&minEV=3
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### ============================================
+### Error Testing
+### ============================================
+
+### Test Invalid Token
+GET http://localhost:3000/api/sports-tools/sports
+Authorization: Bearer invalid_token_here
+
+### Test Missing Token
+GET http://localhost:3000/api/sports-tools/sports
+
+### Test Invalid Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "wrong@example.com",
+  "password": "wrongpassword"
+}
+
+### Test Register with Existing Email
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "anotheruser",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
