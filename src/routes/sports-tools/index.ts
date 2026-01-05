@@ -5,6 +5,11 @@ import {
   getPositiveEV,
   getSports,
 } from "../../controllers/sportsToolsController";
+import {
+  archiveOddsSnapshots,
+  getOddsIngestionStatus,
+  refreshOddsNow,
+} from "../../controllers/oddsIngestionController";
 
 const router = Router();
 
@@ -17,8 +22,12 @@ router.get("/sports", getSports);
 router.get("/cheat-sheet", getCheatSheet);
 router.get("/positive-ev", getPositiveEV);
 
+// v04 — odds ingestion layer
+router.get("/odds/status", getOddsIngestionStatus);
+router.post("/odds/refresh", refreshOddsNow);
+router.post("/odds/archive", archiveOddsSnapshots);
+
 // TODO: Implement other routes
-// router.get('/cheat-sheet', getCheatSheet);
 // router.get('/injuries-news', getInjuriesNews);
 // router.get('/arbitrage', getArbitrage);
 // router.get('/middle-betting', getMiddleBetting);

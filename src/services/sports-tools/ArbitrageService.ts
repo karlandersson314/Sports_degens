@@ -1,3 +1,4 @@
+import { americanToDecimal } from "../../utils/odds";
 import { oddsApiService } from "./OddsApiService";
 
 export type ArbitrageLeg = {
@@ -27,16 +28,6 @@ export type ArbitrageResult = {
   remaining: number;
   warning?: string;
 };
-
-function americanToDecimal(price: number): number {
-  const p = Number(price);
-  if (!Number.isFinite(p) || p === 0) return NaN;
-  // American -> Decimal
-  // +150 => 1 + 150/100 = 2.5
-  // -120 => 1 + 100/120 = 1.8333...
-  if (p > 0) return 1 + p / 100;
-  return 1 + 100 / Math.abs(p);
-}
 
 export class ArbitrageService {
   /**

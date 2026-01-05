@@ -8,6 +8,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import { logger } from "./utils/logger";
 import { createDirectories } from "./utils/createDirectories";
 import baseRoutes from "./routes";
+import { startOddsJobs } from "./jobs";
 
 // Load environment variables (local dev)
 // In local development it's common for Windows/user env vars to be set (sometimes empty).
@@ -60,6 +61,10 @@ async function startServer() {
     // Connect to MongoDB
     await connectDatabase();
     logger.info("Database connected successfully");
+
+    // v04 - start odds ingestion / archiving jobs (configurable by env)
+    startOddsJobs();
+
     // Start HTTP server
     app.listen(PORT, () => {
       logger.info(

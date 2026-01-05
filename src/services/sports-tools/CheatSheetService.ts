@@ -1,3 +1,4 @@
+import { americanToImpliedProb } from "../../utils/odds";
 import { oddsApiService } from "./OddsApiService";
 
 export type CheatSheetOutcome = {
@@ -22,19 +23,6 @@ export type CheatSheetResult = {
   remaining: number;
   warning?: string;
 };
-
-function americanToImpliedProb(price: number): number {
-  // price can be negative or positive (American odds).
-  // Negative: -110 => 110 / (110 + 100)
-  // Positive: +120 => 100 / (120 + 100)
-  const p = Number(price);
-  if (!Number.isFinite(p) || p === 0) return NaN;
-  if (p < 0) {
-    const abs = Math.abs(p);
-    return abs / (abs + 100);
-  }
-  return 100 / (p + 100);
-}
 
 export class CheatSheetService {
   /**
